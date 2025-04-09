@@ -1,0 +1,63 @@
+site_name: X-as-Code Documentation
+site_description: Sample documentation for X-as-Code project
+site_author: X-as-Code Team
+repo_url: https://github.com/yourusername/x-as-code
+repo_name: yourusername/x-as-code
+
+theme:
+  name: material
+  features:
+    - navigation.tabs
+    - navigation.sections
+    - toc.integrate
+    - search.suggest
+    - search.highlight
+    - content.tabs.link
+    - content.code.annotation
+    - content.code.copy
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: indigo
+      toggle:
+        icon: material/brightness-7
+        name: Switch to dark mode
+    - scheme: slate
+      primary: blue
+      accent: blue
+      toggle:
+        icon: material/brightness-4
+        name: Switch to light mode
+
+markdown_extensions:
+  - admonition
+  - codehilite
+  - footnotes
+  - pymdownx.details
+  - pymdownx.highlight:
+      anchor_linenums: true
+  - pymdownx.inlinehilite
+  - pymdownx.snippets
+  - pymdownx.superfences
+  - pymdownx.tabbed:
+      alternate_style: true
+  - toc:
+      permalink: true
+
+nav:
+  - Home: index.md
+  - Getting Started:
+    - Installation: getting-started/installation.md
+    - Quick Start: getting-started/quick-start.md
+  - Domains:
+    - Infrastructure as Code: domains/infrastructure.md
+    - Policy as Code: domains/policy.md
+    - Configuration as Code: domains/configuration.md
+    - Security as Code: domains/security.md
+  - Guides:
+    - Best Practices: guides/best-practices.md
+    - Integration: guides/integration.md
+  - Reference:
+    - Glossary: reference/glossary.md
+    - Tools: reference/tools.md
+  - Contributing: contributing.md
