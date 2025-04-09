@@ -1,0 +1,16 @@
+# These owners will be the default owners for everything in
+# the repo. Unless a later match takes precedence,
+# @leonkalema will be requested for review when someone opens a pull request.
+*       @leonkalema
+
+# Infrastructure domain owners
+/infrastructure/  @leonkalema
+
+# Policy domain owners
+/policy/  @leonkalema
+
+# Security domain owners
+/security/  @leonkalema
+
+# Documentation domain owners
+/documentation/  @leonkalema

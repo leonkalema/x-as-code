@@ -1,0 +1,46 @@
+name: Terraform Validation
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'infrastructure/examples/terraform/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'infrastructure/examples/terraform/**'
+
+jobs:
+  terraform-validate:
+    name: Validate Terraform Examples
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Terraform
+      uses: hashicorp/setup-terraform@v2
+      with:
+        terraform_version: 1.0.0
+    
+    - name: Find Terraform directories
+      id: find-terraform
+      run: |
+        DIRS=$(find infrastructure/examples/terraform -type f -name "*.tf" -exec dirname {} \; | sort -u)
+        echo "TERRAFORM_DIRS=${DIRS}" >> $GITHUB_ENV
+    
+    - name: Terraform Validation
+      run: |
+        set -e
+        for dir in $TERRAFORM_DIRS; do
+          echo "Validating Terraform in directory: $dir"
+          cd "$GITHUB_WORKSPACE/$dir"
+          terraform init -backend=false
+          terraform validate
+          cd "$GITHUB_WORKSPACE"
+        done
+
+    - name: Run tfsec
+      uses: aquasecurity/tfsec-action@v1.0.0
+      with:
+        working_directory: infrastructure/examples/terraform

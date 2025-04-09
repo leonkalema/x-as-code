@@ -1,0 +1,95 @@
+name: Documentation Build
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - 'documentation/**'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - 'documentation/**'
+
+jobs:
+  build-mkdocs:
+    name: Build MkDocs Example
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install mkdocs mkdocs-material
+    
+    - name: Build MkDocs site
+      run: |
+        cd documentation/examples/mkdocs/basic-project
+        mkdocs build --strict
+    
+    - name: Archive MkDocs build
+      uses: actions/upload-artifact@v3
+      with:
+        name: mkdocs-site
+        path: documentation/examples/mkdocs/basic-project/site/
+        retention-days: 5
+
+  build-sphinx:
+    name: Build Sphinx Example
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Set up Python
+      uses: actions/setup-python@v4
+      with:
+        python-version: '3.10'
+    
+    - name: Install dependencies
+      run: |
+        python -m pip install --upgrade pip
+        pip install sphinx sphinx-rtd-theme
+    
+    - name: Build Sphinx docs
+      run: |
+        cd documentation/examples/sphinx/api-docs
+        # Create _build directory
+        mkdir -p _build/html
+        sphinx-build -b html . _build/html
+    
+    - name: Archive Sphinx build
+      uses: actions/upload-artifact@v3
+      with:
+        name: sphinx-site
+        path: documentation/examples/sphinx/api-docs/_build/html/
+        retention-days: 5
+
+  build-docusaurus:
+    name: Build Docusaurus Example
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    
+    - name: Install dependencies
+      working-directory: documentation/examples/docusaurus/static-site
+      run: |
+        if [ -f package.json ]; then
+          npm install
+          npm run build
+        else
+          echo "No package.json found, skipping Docusaurus build"
+        fi
+      continue-on-error: true

@@ -1,0 +1,31 @@
+name: Lint Markdown
+
+on:
+  push:
+    branches: [ main ]
+    paths:
+      - '**/*.md'
+  pull_request:
+    branches: [ main ]
+    paths:
+      - '**/*.md'
+
+jobs:
+  markdown-lint:
+    name: Lint Markdown Files
+    runs-on: ubuntu-latest
+    
+    steps:
+    - uses: actions/checkout@v3
+    
+    - name: Setup Node.js
+      uses: actions/setup-node@v3
+      with:
+        node-version: 16
+    
+    - name: Install markdownlint
+      run: npm install -g markdownlint-cli
+    
+    - name: Lint Markdown files
+      run: markdownlint "**/*.md" --ignore node_modules
+      continue-on-error: true  # Don't fail the workflow yet (informational)
