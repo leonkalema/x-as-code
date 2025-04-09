@@ -1,0 +1,102 @@
+# Cybersecurity Management System (CSMS) Document
+
+**{{ data.meta.company }}**  
+**Vehicle Type: {{ data.meta.vehicle_type }}**  
+**Document Version: {{ data.meta.document_version }}**  
+**Date: {{ data.meta.date_generated }}**  
+**Confidentiality: {{ data.meta.confidentiality }}**  
+
+## 1. Introduction
+
+This document describes the Cybersecurity Management System (CSMS) implemented by {{ data.meta.company }} in compliance with UN Regulation No. 155 (R155). The CSMS establishes processes, policies, and controls to ensure appropriate cybersecurity measures throughout the vehicle lifecycle.
+
+## 2. CSMS Overview
+
+The {{ data.meta.company }} CSMS is structured to ensure that cybersecurity is addressed throughout the organization, development process, and vehicle lifecycle. Our approach is based on the following principles:
+
+- Security by Design
+- Defense in Depth
+- Least Privilege
+- Regular Assessment and Improvement
+- Comprehensive Risk Management
+
+## 3. Organizational Structure
+
+The cybersecurity governance structure is as follows:
+
+- Chief Information Security Officer (CISO): Overall responsibility for cybersecurity
+- Vehicle Cybersecurity Team: Implementation and monitoring of vehicle security
+- Product Development Teams: Integration of security in development
+- Incident Response Team: Handling of security incidents
+
+## 4. Risk Management Process
+
+The risk management process follows ISO/SAE 21434 and includes:
+
+{% if data.threats %}
+### 4.1. Identified Threats
+
+| ID | Threat | Risk Level | Controls |
+|----|--------|------------|----------|
+{% for threat in data.threats %}
+| {{ threat.id }} | {{ threat.name }} | {{ threat.risk_level }} | {{ threat.mitigations | join(', ') }} |
+{% endfor %}
+{% endif %}
+
+## 5. Security Controls
+
+{% if data.controls %}
+The following security controls have been implemented:
+
+| ID | Control Name | Description | Status |
+|----|--------------|-------------|--------|
+{% for control in data.controls %}
+| {{ control.id }} | {{ control.name }} | {{ control.description }} | {{ control.status }} |
+{% endfor %}
+{% endif %}
+
+## 6. Security Testing and Verification
+
+Our verification approach includes:
+
+- Static Code Analysis
+- Dynamic Security Testing
+- Penetration Testing
+- Vulnerability Scanning
+- Compliance Checking
+
+## 7. Incident Response
+
+The incident response process includes:
+
+- Detection mechanisms
+- Classification procedures
+- Response procedures
+- Recovery processes
+- Post-incident analysis
+
+## 8. Supply Chain Security
+
+Our supply chain security measures include:
+
+- Supplier security requirements
+- Component validation
+- Secure delivery mechanisms
+- Vulnerability management
+
+## 9. Continuous Improvement
+
+The CSMS is continuously improved through:
+
+- Regular internal audits
+- Management reviews
+- Vulnerability tracking
+- Threat intelligence monitoring
+
+## 10. Conclusion
+
+This CSMS document demonstrates {{ data.meta.company }}'s commitment to vehicle cybersecurity in compliance with {{ data.meta.r155_version }}.
+
+---
+
+*Document automatically generated on {{ data.meta.date_generated }}*

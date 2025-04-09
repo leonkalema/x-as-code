@@ -1,0 +1,179 @@
+# Automotive Infotainment System Components
+# Definition file for threat modeling
+
+components:
+  - id: "HU"
+    name: "Head Unit"
+    type: "computing_unit"
+    description: "Main computing unit for infotainment system"
+    criticality: "Medium"
+    
+  - id: "TCU"
+    name: "Telematics Control Unit"
+    type: "computing_unit"
+    description: "Unit handling external connectivity"
+    criticality: "High"
+    
+  - id: "BT"
+    name: "Bluetooth Module"
+    type: "external_interface"
+    description: "Bluetooth communication module"
+    criticality: "Medium"
+    
+  - id: "CELL"
+    name: "Cellular Module"
+    type: "external_interface"
+    description: "4G/5G connectivity module"
+    criticality: "High"
+    
+  - id: "WIFI"
+    name: "WiFi Module"
+    type: "external_interface"
+    description: "WiFi connectivity"
+    criticality: "Medium"
+    
+  - id: "USB"
+    name: "USB Ports"
+    type: "physical_interface"
+    description: "USB connectivity for media and charging"
+    criticality: "Medium"
+    
+  - id: "DISPLAY"
+    name: "Display"
+    type: "output_device"
+    description: "Main display unit"
+    criticality: "Low"
+    
+  - id: "AUDIO"
+    name: "Audio System"
+    type: "output_device"
+    description: "Speakers and audio system"
+    criticality: "Low"
+    
+  - id: "CAN-GW"
+    name: "CAN Gateway"
+    type: "gateway"
+    description: "Gateway to vehicle CAN bus systems"
+    criticality: "Critical"
+    
+  - id: "STORAGE"
+    name: "Local Storage"
+    type: "storage"
+    description: "Local storage for media and applications"
+    criticality: "Medium"
+    
+  - id: "APPFW"
+    name: "Application Framework"
+    type: "software"
+    description: "Framework for running applications"
+    criticality: "Medium"
+    
+  - id: "OS"
+    name: "Operating System"
+    type: "software"
+    description: "Base operating system"
+    criticality: "High"
+
+connections:
+  - source: "BT"
+    target: "HU"
+    type: "data"
+    protocol: "Bluetooth"
+    description: "Bluetooth communication with head unit"
+    
+  - source: "CELL"
+    target: "TCU"
+    type: "data"
+    protocol: "Cellular"
+    description: "Mobile network connectivity"
+    
+  - source: "WIFI"
+    target: "TCU"
+    type: "data"
+    protocol: "WiFi"
+    description: "WiFi connectivity"
+    
+  - source: "USB"
+    target: "HU"
+    type: "data"
+    protocol: "USB"
+    description: "USB connectivity for media and charging"
+    
+  - source: "HU"
+    target: "DISPLAY"
+    type: "data"
+    protocol: "LVDS"
+    description: "Display connectivity"
+    
+  - source: "HU"
+    target: "AUDIO"
+    type: "data"
+    protocol: "I2S"
+    description: "Audio output"
+    
+  - source: "TCU"
+    target: "HU"
+    type: "data"
+    protocol: "Ethernet"
+    description: "Communication between telematics and head unit"
+    
+  - source: "HU"
+    target: "CAN-GW"
+    type: "data"
+    protocol: "CAN"
+    description: "Communication with vehicle systems"
+    
+  - source: "HU"
+    target: "STORAGE"
+    type: "data"
+    protocol: "SPI"
+    description: "Access to local storage"
+    
+  - source: "OS"
+    target: "HU"
+    type: "software"
+    protocol: "Internal"
+    description: "OS running on head unit"
+    
+  - source: "APPFW"
+    target: "OS"
+    type: "software"
+    protocol: "Internal"
+    description: "Application framework on top of OS"
+
+external_connections:
+  - component: "CELL"
+    endpoint: "Mobile Network"
+    direction: "bidirectional"
+    protocol: "Cellular (4G/5G)"
+    
+  - component: "BT"
+    endpoint: "User Devices"
+    direction: "bidirectional"
+    protocol: "Bluetooth"
+    
+  - component: "WIFI"
+    endpoint: "External WiFi Networks"
+    direction: "bidirectional"
+    protocol: "WiFi"
+    
+  - component: "USB"
+    endpoint: "User Devices/Media"
+    direction: "bidirectional"
+    protocol: "USB"
+
+trust_boundaries:
+  - name: "External Boundary"
+    description: "Boundary between vehicle and external world"
+    components_inside: ["HU", "TCU", "DISPLAY", "AUDIO", "CAN-GW", "STORAGE", "APPFW", "OS"]
+    components_outside: ["BT", "CELL", "WIFI", "USB"]
+    
+  - name: "Vehicle Network Boundary"
+    description: "Boundary between infotainment and vehicle control systems"
+    components_inside: ["CAN-GW"]
+    components_outside: ["HU", "TCU", "BT", "CELL", "WIFI", "USB", "DISPLAY", "AUDIO", "STORAGE", "APPFW", "OS"]
+    
+  - name: "Application Boundary"
+    description: "Boundary between OS and applications"
+    components_inside: ["OS"]
+    components_outside: ["APPFW"]

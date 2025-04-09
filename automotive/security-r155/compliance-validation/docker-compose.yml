@@ -1,0 +1,111 @@
+version: '3.8'
+
+# Automotive Security R155 Compliance Validation Suite
+# This setup provides automated tools for security testing and compliance checks
+
+services:
+  # Vulnerability scanning for ECU software components
+  vulnerability-scanner:
+    image: security/vuln-scanner:latest
+    volumes:
+      - ./ecu-firmware:/firmware:ro
+      - ./scan-results:/results
+    environment:
+      - SCAN_TYPE=FULL
+      - REPORT_FORMAT=HTML,JSON
+      - COMPLIANCE_STANDARD=ISO21434,UNECE_R155
+    command: ["--scan-dir", "/firmware", "--output-dir", "/results"]
+    networks:
+      - security-validation
+    restart: "no"
+
+  # Static application security testing for automotive software
+  sast-analyzer:
+    image: security/sast-automotive:latest
+    volumes:
+      - ./ecu-source:/source:ro
+      - ./sast-results:/results
+    environment:
+      - AUTOMOTIVE_RULES=true
+      - SAFETY_CRITICAL=true
+      - MISRA_COMPLIANCE=true
+      - CWE_AUTOMOTIVE=true
+    command: ["analyze", "--source", "/source", "--output", "/results"]
+    networks:
+      - security-validation
+    restart: "no"
+
+  # Fuzzer for CAN bus message testing
+  can-fuzzer:
+    image: security/can-fuzzer:latest
+    volumes:
+      - ./can-definitions:/definitions:ro
+      - ./fuzzing-results:/results
+    environment:
+      - FUZZ_DURATION=8h
+      - FUZZ_INTENSITY=medium
+      - TARGET_INTERFACE=vcan0
+    command: ["--can-db", "/definitions/vehicle.dbc", "--output", "/results"]
+    privileged: true
+    networks:
+      - security-validation
+    restart: "no"
+
+  # Network penetration testing tool for in-vehicle networks
+  network-pentest:
+    image: security/auto-pentest:latest
+    volumes:
+      - ./network-topology:/topology:ro
+      - ./pentest-results:/results
+    environment:
+      - TEST_SUITE=full
+      - TARGET_DOMAINS=infotainment,telematics
+      - REPORT_COMPLIANCE=UNECE_R155
+    command: ["--topology", "/topology/network.yaml", "--output", "/results"]
+    networks:
+      - security-validation
+    restart: "no"
+
+  # Compliance reporting and documentation generator
+  compliance-reporter:
+    image: security/compliance-report:latest
+    volumes:
+      - ./scan-results:/input/vulnerability
+      - ./sast-results:/input/sast
+      - ./fuzzing-results:/input/fuzzing
+      - ./pentest-results:/input/pentest
+      - ./compliance-reports:/reports
+    environment:
+      - REPORT_STANDARD=UNECE_R155
+      - REPORT_FORMAT=PDF,HTML,DOCX
+      - INCLUDE_EVIDENCE=true
+      - REPORT_TITLE=Vehicle Security R155 Compliance Report
+    depends_on:
+      - vulnerability-scanner
+      - sast-analyzer
+      - can-fuzzer
+      - network-pentest
+    command: ["generate", "--input-dir", "/input", "--output-dir", "/reports"]
+    networks:
+      - security-validation
+
+  # Security dashboard for visualizing compliance status
+  security-dashboard:
+    image: security/compliance-dashboard:latest
+    ports:
+      - "8080:80"
+    volumes:
+      - ./compliance-reports:/data
+    environment:
+      - DASHBOARD_TITLE=R155 Compliance Dashboard
+      - REFRESH_INTERVAL=3600
+      - AUTH_REQUIRED=true
+    depends_on:
+      - compliance-reporter
+    networks:
+      - security-validation
+    restart: unless-stopped
+
+networks:
+  security-validation:
+    driver: bridge

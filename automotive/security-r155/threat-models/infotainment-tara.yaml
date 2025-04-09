@@ -1,0 +1,147 @@
+# Threat Analysis and Risk Assessment (TARA) for Infotainment System
+# Follows ISO/SAE 21434 methodology
+
+system:
+  name: "Vehicle Infotainment System"
+  version: "1.0"
+  description: "Main entertainment and information system with cellular connectivity"
+  
+components:
+  - id: "INF-HU"
+    name: "Head Unit"
+    type: "Hardware"
+    description: "Main computing unit for infotainment system"
+    
+  - id: "INF-SW"
+    name: "Infotainment Software"
+    type: "Software"
+    description: "OS and applications running on the head unit"
+    
+  - id: "INF-BT"
+    name: "Bluetooth Module"
+    type: "Hardware"
+    description: "Bluetooth communication module"
+    
+  - id: "INF-CELL"
+    name: "Cellular Module"
+    type: "Hardware"
+    description: "4G/5G connectivity module"
+
+attack_vectors:
+  - id: "AV-1"
+    name: "Bluetooth Protocol Exploitation"
+    description: "Exploiting vulnerabilities in Bluetooth stack"
+    affected_components: ["INF-BT", "INF-SW"]
+    
+  - id: "AV-2"
+    name: "Cellular Network Attack"
+    description: "Attacks through cellular connection"
+    affected_components: ["INF-CELL", "INF-SW"]
+    
+  - id: "AV-3"
+    name: "USB Media Attack"
+    description: "Malicious files on USB media"
+    affected_components: ["INF-SW"]
+    
+  - id: "AV-4"
+    name: "Application Vulnerabilities"
+    description: "Vulnerabilities in 3rd party applications"
+    affected_components: ["INF-SW"]
+
+threats:
+  - id: "T-1"
+    name: "Unauthorized Access to Vehicle Data"
+    description: "Attacker gains access to sensitive vehicle or user data"
+    attack_vectors: ["AV-1", "AV-2", "AV-4"]
+    impact:
+      safety: "Low"
+      privacy: "High"
+      operational: "Medium"
+      financial: "Medium"
+    feasibility: "Medium"
+    risk_level: "High"
+    
+  - id: "T-2"
+    name: "Denial of Service"
+    description: "System becomes unavailable due to attack"
+    attack_vectors: ["AV-1", "AV-2", "AV-3"]
+    impact:
+      safety: "Low"
+      privacy: "Low"
+      operational: "High"
+      financial: "Medium"
+    feasibility: "High"
+    risk_level: "Medium"
+    
+  - id: "T-3"
+    name: "Privilege Escalation"
+    description: "Attacker gains elevated privileges"
+    attack_vectors: ["AV-2", "AV-3", "AV-4"]
+    impact:
+      safety: "Medium"
+      privacy: "High"
+      operational: "High"
+      financial: "Medium"
+    feasibility: "Medium"
+    risk_level: "High"
+    
+  - id: "T-4"
+    name: "Lateral Movement to Critical Systems"
+    description: "Attack pivots from infotainment to safety-critical systems"
+    attack_vectors: ["AV-2", "AV-4"]
+    impact:
+      safety: "High"
+      privacy: "Medium"
+      operational: "High"
+      financial: "High"
+    feasibility: "Low" 
+    risk_level: "Medium"
+
+security_controls:
+  - id: "SC-1"
+    name: "Bluetooth Security Hardening"
+    description: "Implement secure Bluetooth pairing and communication"
+    mitigates_threats: ["T-1", "T-2"]
+    verification_method: "Security testing"
+    implementation_status: "Implemented"
+    
+  - id: "SC-2"
+    name: "Network Traffic Filtering"
+    description: "Filter and monitor cellular network traffic"
+    mitigates_threats: ["T-1", "T-2", "T-3"]
+    verification_method: "Security testing, code review"
+    implementation_status: "Implemented"
+    
+  - id: "SC-3"
+    name: "Media Sanitization"
+    description: "Sanitize and validate all files from external media"
+    mitigates_threats: ["T-3"]
+    verification_method: "Security testing"
+    implementation_status: "In progress"
+    
+  - id: "SC-4"
+    name: "Domain Separation"
+    description: "Strict separation between infotainment and vehicle control domains"
+    mitigates_threats: ["T-4"]
+    verification_method: "Architecture review, penetration testing"
+    implementation_status: "Implemented"
+    
+  - id: "SC-5"
+    name: "Application Sandboxing"
+    description: "Run applications in sandboxed environment"
+    mitigates_threats: ["T-1", "T-3", "T-4"]
+    verification_method: "Architecture review, security testing"
+    implementation_status: "Implemented"
+
+risk_assessment:
+  methodology: "ISO/SAE 21434"
+  overall_risk: "Medium"
+  recommended_actions:
+    - "Complete implementation of media sanitization controls (SC-3)"
+    - "Perform penetration testing on cellular interfaces"
+    - "Review access controls between domains"
+  
+validation:
+  last_reviewed: "2025-02-15"
+  reviewed_by: "Automotive Security Team"
+  next_review: "2025-08-15"

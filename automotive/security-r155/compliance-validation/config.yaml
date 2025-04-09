@@ -1,0 +1,45 @@
+# R155 Compliance Checker Configuration
+# This file configures the compliance checker for a specific vehicle type
+
+# Assessment metadata
+assessor: "Automotive Security Team"
+assessment_date: "2025-04-09"
+vehicle_type: "Example Electric SUV Platform"
+r155_version: "UN R155 Rev.2"
+
+# Directories containing evidence
+evidence_directory: "evidence"
+threat_models_directory: "../threat-models"
+csms_documentation: "../documentation/output/r155_csms_document.md"
+ota_documentation: "../documentation/output/ota_security_architecture.md"
+ota_system_path: "../security-controls"
+compliance_matrix: "compliance_matrix.yaml"
+
+# Paths to specific evidence files
+security_architecture_document: "../documentation/output/security_architecture.md"
+risk_assessment_document: "../documentation/output/risk_assessment.md"
+incident_response_plan: "../incident-response/vehicle_security_incident_playbook.yaml"
+security_controls_evidence: "../security-controls/vehicle_firewall_rules.tf"
+
+# Requirements that are not applicable to this vehicle type
+# (if any - typically all are applicable)
+not_applicable_requirements: []
+
+# External systems integration configuration
+external_systems:
+  vulnerability_database:
+    url: "https://example.com/api/vulnerabilities"
+    api_key: "{{ env.VULN_DB_API_KEY }}"
+    enabled: false
+  
+  fleet_monitoring:
+    url: "https://example.com/api/fleet-monitoring"
+    api_key: "{{ env.FLEET_MONITOR_API_KEY }}"
+    enabled: false
+
+# Report configuration
+report:
+  include_evidence_details: true
+  include_recommendations: true
+  company_logo: "company_logo.png"
+  confidentiality: "Confidential"

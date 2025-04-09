@@ -1,0 +1,240 @@
+# Automotive Threat Library
+# Standard threat definitions for automotive systems
+
+threats:
+  # Spoofing threats
+  - name: "Bluetooth Device Spoofing"
+    description: "Attacker spoofs a trusted Bluetooth device to gain access"
+    threat_type: "spoofing"
+    component_types: ["external_interface"]
+    impact:
+      safety: "Low"
+      privacy: "Medium"
+      operational: "Medium"
+      financial: "Low"
+    likelihood: "Medium"
+    risk_level: "Medium"
+    
+  - name: "GPS Signal Spoofing"
+    description: "Attacker spoofs GPS signals to provide false location data"
+    threat_type: "spoofing"
+    component_types: ["external_interface"]
+    impact:
+      safety: "High"
+      privacy: "Medium"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "Low"
+    risk_level: "Medium"
+    
+  - name: "CAN Message Spoofing"
+    description: "Attacker injects spoofed CAN messages into vehicle network"
+    threat_type: "spoofing"
+    component_types: ["gateway"]
+    impact:
+      safety: "Critical"
+      privacy: "Low"
+      operational: "High"
+      financial: "High"
+    likelihood: "Low"
+    risk_level: "High"
+    
+  # Tampering threats
+  - name: "Firmware Tampering"
+    description: "Unauthorized modification of firmware"
+    threat_type: "tampering"
+    component_types: ["computing_unit", "software"]
+    impact:
+      safety: "High"
+      privacy: "High"
+      operational: "High"
+      financial: "High"
+    likelihood: "Low"
+    risk_level: "High"
+    
+  - name: "Configuration Tampering"
+    description: "Unauthorized modification of system configuration"
+    threat_type: "tampering"
+    component_types: ["computing_unit", "software"]
+    impact:
+      safety: "Medium"
+      privacy: "Medium"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "Medium"
+    risk_level: "Medium"
+    
+  - name: "Physical Tampering"
+    description: "Physical tampering with hardware components"
+    threat_type: "tampering"
+    component_types: ["physical_interface"]
+    impact:
+      safety: "High"
+      privacy: "High"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "Low"
+    risk_level: "Medium"
+    
+  # Information disclosure threats
+  - name: "Data Exfiltration"
+    description: "Unauthorized extraction of sensitive data"
+    threat_type: "information_disclosure"
+    component_types: ["storage", "computing_unit"]
+    impact:
+      safety: "Low"
+      privacy: "Critical"
+      operational: "Medium"
+      financial: "High"
+    likelihood: "Medium"
+    risk_level: "High"
+    
+  - name: "Communication Eavesdropping"
+    description: "Interception of communication between components"
+    threat_type: "information_disclosure"
+    component_types: ["external_interface"]
+    impact:
+      safety: "Low"
+      privacy: "High"
+      operational: "Low"
+      financial: "Medium"
+    likelihood: "Medium"
+    risk_level: "Medium"
+    
+  - name: "User Data Leakage"
+    description: "Leakage of user personal data"
+    threat_type: "information_disclosure"
+    component_types: ["storage", "computing_unit", "software"]
+    impact:
+      safety: "Low"
+      privacy: "Critical"
+      operational: "Low"
+      financial: "High"
+    likelihood: "Medium"
+    risk_level: "High"
+    
+  # Denial of service threats
+  - name: "Communication Jamming"
+    description: "Jamming of wireless communication channels"
+    threat_type: "denial_of_service"
+    component_types: ["external_interface"]
+    impact:
+      safety: "Medium"
+      privacy: "Low"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "Medium"
+    risk_level: "Medium"
+    
+  - name: "Resource Exhaustion"
+    description: "Exhaustion of system resources"
+    threat_type: "denial_of_service"
+    component_types: ["computing_unit", "software"]
+    impact:
+      safety: "Medium"
+      privacy: "Low"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "Medium"
+    risk_level: "Medium"
+    
+  - name: "System Flooding"
+    description: "Flooding system with requests or data"
+    threat_type: "denial_of_service"
+    component_types: ["external_interface", "gateway"]
+    impact:
+      safety: "Medium"
+      privacy: "Low"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "High"
+    risk_level: "High"
+    
+  # Elevation of privilege threats
+  - name: "OS Privilege Escalation"
+    description: "Escalation of privileges within the operating system"
+    threat_type: "elevation_of_privilege"
+    component_types: ["software"]
+    impact:
+      safety: "High"
+      privacy: "High"
+      operational: "High"
+      financial: "High"
+    likelihood: "Medium"
+    risk_level: "High"
+    
+  - name: "Application Sandbox Escape"
+    description: "Breaking out of application sandbox"
+    threat_type: "elevation_of_privilege"
+    component_types: ["software"]
+    impact:
+      safety: "Medium"
+      privacy: "High"
+      operational: "High"
+      financial: "Medium"
+    likelihood: "Medium"
+    risk_level: "Medium"
+    
+  - name: "Domain Boundary Violation"
+    description: "Violating separation between security domains"
+    threat_type: "elevation_of_privilege"
+    component_types: ["gateway", "computing_unit"]
+    impact:
+      safety: "Critical"
+      privacy: "High"
+      operational: "High"
+      financial: "High"
+    likelihood: "Low"
+    risk_level: "High"
+
+# Security controls to mitigate threats
+controls:
+  - name: "Secure Boot"
+    description: "Verify integrity of firmware during boot process"
+    threat_types: ["tampering"]
+    component_types: ["computing_unit", "software"]
+    
+  - name: "Code Signing"
+    description: "Sign code to ensure authenticity and integrity"
+    threat_types: ["tampering"]
+    component_types: ["software"]
+    
+  - name: "Encryption"
+    description: "Encrypt sensitive data at rest and in transit"
+    threat_types: ["information_disclosure"]
+    component_types: ["storage", "external_interface"]
+    
+  - name: "Authentication"
+    description: "Authenticate devices and users before granting access"
+    threat_types: ["spoofing", "elevation_of_privilege"]
+    component_types: ["external_interface", "software"]
+    
+  - name: "Intrusion Detection"
+    description: "Detect and alert on suspicious activities"
+    threat_types: ["spoofing", "tampering", "elevation_of_privilege"]
+    component_types: ["gateway", "computing_unit"]
+    
+  - name: "Message Authentication"
+    description: "Authenticate messages to prevent spoofing and tampering"
+    threat_types: ["spoofing", "tampering"]
+    component_types: ["gateway", "external_interface"]
+    
+  - name: "Sandboxing"
+    description: "Isolate applications from each other and the system"
+    threat_types: ["elevation_of_privilege"]
+    component_types: ["software"]
+    
+  - name: "Rate Limiting"
+    description: "Limit the rate of requests to prevent resource exhaustion"
+    threat_types: ["denial_of_service"]
+    component_types: ["external_interface", "gateway"]
+    
+  - name: "Access Control"
+    description: "Control access to resources based on privileges"
+    threat_types: ["information_disclosure", "elevation_of_privilege"]
+    component_types: ["software", "gateway", "storage"]
+    
+  - name: "Secure Update"
+    description: "Securely deliver and install software updates"
+    threat_types: ["tampering"]
+    component_types: ["software", "computing_unit"]
