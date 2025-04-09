@@ -1,0 +1,120 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: sealed-secrets
+---
+apiVersion: helm.toolkit.fluxcd.io/v2beta1
+kind: HelmRelease
+metadata:
+  name: sealed-secrets
+  namespace: sealed-secrets
+spec:
+  interval: 1h
+  chart:
+    spec:
+      chart: sealed-secrets
+      version: "2.7.2"
+      sourceRef:
+        kind: HelmRepository
+        name: sealed-secrets
+        namespace: flux-system
+  values:
+    # Security-focused configuration
+    fullnameOverride: sealed-secrets-controller
+    rbac:
+      create: true
+      pspEnabled: false
+    
+    podSecurityContext:
+      fsGroup: 65534
+    
+    securityContext:
+      readOnlyRootFilesystem: true
+      runAsNonRoot: true
+      runAsUser: 1000
+      allowPrivilegeEscalation: false
+      capabilities:
+        drop:
+        - ALL
+    
+    resources:
+      requests:
+        cpu: 100m
+        memory: 128Mi
+      limits:
+        cpu: 250m
+        memory: 256Mi
+    
+    # Certificate renewal configuration
+    secretName: "sealed-secrets-key"
+    keyRenewPeriod: "30d"  # Auto-renew the key every 30 days
+    
+    # Controller configuration
+    controller:
+      # Only decrypt secrets for the namespace they're in
+      # unless overridden by annotation
+      namespaceScope: true
+      
+      tolerations: []
+      
+      podLabels:
+        app.kubernetes.io/managed-by: helm
+        app.kubernetes.io/instance: sealed-secrets
+      
+      podAnnotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+      
+      networkPolicy:
+        enabled: true
+        egress:
+        - ports:
+          - port: 53
+            protocol: UDP
+          - port: 53
+            protocol: TCP
+---
+# Instructions to securely seal secrets
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sealed-secrets-instructions
+  namespace: sealed-secrets
+data:
+  README.md: |
+    # Sealed Secrets Usage Guide
+    
+    ## Creating a sealed secret
+    
+    1. First, create a regular Kubernetes Secret:
+    
+    ```bash
+    kubectl create secret generic my-secret --from-literal=username=admin --from-literal=password=supersecret --dry-run=client -o yaml > my-secret.yaml
+    ```
+    
+    2. Seal the secret (requires kubeseal CLI):
+    
+    ```bash
+    kubeseal --format yaml < my-secret.yaml > my-sealed-secret.yaml
+    ```
+    
+    3. Delete the original Secret YAML file:
+    
+    ```bash
+    shred -u my-secret.yaml  # Securely delete the file
+    ```
+    
+    4. Commit the SealedSecret to git:
+    
+    ```bash
+    git add my-sealed-secret.yaml
+    git commit -m "Add sealed secret for my-app"
+    ```
+    
+    ## Security best practices
+    
+    1. Never commit raw Kubernetes Secrets to git
+    2. Regularly rotate the sealed-secrets-key
+    3. Use namespace-specific secrets unless a secret needs to be used across namespaces
+    4. Set appropriate RBAC to limit who can create/update SealedSecrets
+    5. Run `kubeseal` on a secure machine with access to the cluster

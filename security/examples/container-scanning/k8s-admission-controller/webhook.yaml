@@ -1,0 +1,116 @@
+apiVersion: admissionregistration.k8s.io/v1
+kind: ValidatingWebhookConfiguration
+metadata:
+  name: image-validation-webhook
+webhooks:
+  - name: image-validator.security.example.com
+    failurePolicy: Fail
+    sideEffects: None
+    admissionReviewVersions: ["v1", "v1beta1"]
+    clientConfig:
+      service:
+        name: image-validator-webhook
+        namespace: security
+        path: "/validate"
+      caBundle: ${CA_BUNDLE}
+    rules:
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: [""]
+        apiVersions: ["v1"]
+        resources: ["pods"]
+      - operations: ["CREATE", "UPDATE"]
+        apiGroups: ["apps"]
+        apiVersions: ["v1"]
+        resources: ["deployments", "statefulsets", "daemonsets"]
+    namespaceSelector:
+      matchExpressions:
+        - key: kubernetes.io/metadata.name
+          operator: NotIn
+          values: ["kube-system", "security"] # Exclude system namespaces
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: image-validator-webhook
+  namespace: security
+spec:
+  selector:
+    app: image-validator
+  ports:
+    - port: 443
+      targetPort: 8443
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: image-validator
+  namespace: security
+spec:
+  replicas: 2
+  selector:
+    matchLabels:
+      app: image-validator
+  template:
+    metadata:
+      labels:
+        app: image-validator
+    spec:
+      containers:
+        - name: validator
+          image: image-validator:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8443
+          volumeMounts:
+            - name: tls-certs
+              mountPath: /etc/webhook/certs
+              readOnly: true
+            - name: config
+              mountPath: /etc/webhook/config
+              readOnly: true
+          resources:
+            limits:
+              cpu: "500m"
+              memory: "512Mi"
+            requests:
+              cpu: "100m"
+              memory: "128Mi"
+          securityContext:
+            runAsNonRoot: true
+            runAsUser: 1000
+            allowPrivilegeEscalation: false
+          livenessProbe:
+            httpGet:
+              path: /health
+              port: 8443
+              scheme: HTTPS
+            initialDelaySeconds: 5
+            periodSeconds: 10
+      volumes:
+        - name: tls-certs
+          secret:
+            secretName: image-validator-tls
+        - name: config
+          configMap:
+            name: image-validator-config
+---
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: image-validator-config
+  namespace: security
+data:
+  config.yaml: |
+    allowedRegistries:
+      - docker.io/library
+      - gcr.io/my-project
+      - registry.company.com
+    blockedImages:
+      - "*:latest"
+    requireImageSignature: true
+    scanThresholds:
+      critical: 0
+      high: 2
+    exemptNamespaces:
+      - development
+      - testing

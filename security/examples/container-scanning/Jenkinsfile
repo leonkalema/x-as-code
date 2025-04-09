@@ -1,0 +1,109 @@
+pipeline {
+    agent {
+        docker {
+            image 'docker:dind'
+            args '-v /var/run/docker.sock:/var/run/docker.sock'
+        }
+    }
+    
+    environment {
+        IMAGE_NAME = 'my-app'
+        IMAGE_TAG = "${env.BUILD_NUMBER}"
+        FULL_IMAGE_NAME = "${IMAGE_NAME}:${IMAGE_TAG}"
+        TRIVY_VERSION = '0.35.0'
+        MAX_CRITICAL_VULNERABILITIES = 0
+        MAX_HIGH_VULNERABILITIES = 5
+    }
+    
+    stages {
+        stage('Build Image') {
+            steps {
+                sh 'docker build -t ${FULL_IMAGE_NAME} .'
+            }
+        }
+        
+        stage('Run Container Security Scan') {
+            steps {
+                // Download and install Trivy
+                sh '''
+                    apk add --no-cache curl
+                    curl -sfL https://raw.githubusercontent.com/aquasecurity/trivy/main/contrib/install.sh | sh -s -- -b /usr/local/bin ${TRIVY_VERSION}
+                '''
+                
+                // Scan for vulnerabilities and save report
+                sh '''
+                    trivy image --no-progress --format json --output trivy-results.json ${FULL_IMAGE_NAME}
+                    trivy image --no-progress --severity CRITICAL,HIGH --exit-code 0 ${FULL_IMAGE_NAME} > trivy-summary.txt
+                '''
+                
+                // Get vulnerability counts and check against thresholds
+                sh '''
+                    CRITICAL_COUNT=$(grep -c "CRITICAL" trivy-summary.txt || echo 0)
+                    HIGH_COUNT=$(grep -c "HIGH" trivy-summary.txt || echo 0)
+                    
+                    echo "Found ${CRITICAL_COUNT} CRITICAL vulnerabilities"
+                    echo "Found ${HIGH_COUNT} HIGH vulnerabilities"
+                    
+                    if [ ${CRITICAL_COUNT} -gt ${MAX_CRITICAL_VULNERABILITIES} ]; then
+                        echo "CRITICAL vulnerabilities exceed threshold of ${MAX_CRITICAL_VULNERABILITIES}"
+                        exit 1
+                    fi
+                    
+                    if [ ${HIGH_COUNT} -gt ${MAX_HIGH_VULNERABILITIES} ]; then
+                        echo "HIGH vulnerabilities exceed threshold of ${MAX_HIGH_VULNERABILITIES}"
+                        exit 1
+                    fi
+                '''
+            }
+            
+            post {
+                always {
+                    // Archive scan results
+                    archiveArtifacts artifacts: 'trivy-results.json,trivy-summary.txt', fingerprint: true
+                }
+                failure {
+                    // Mark the build as unstable if the security scan fails but don't stop the pipeline
+                    unstable(message: "Security scan failed. Vulnerabilities exceed threshold.")
+                }
+            }
+        }
+        
+        stage('Test Image') {
+            steps {
+                sh '''
+                    # Run container tests here
+                    echo "Running tests on container..."
+                    # Example test command
+                    docker run --rm ${FULL_IMAGE_NAME} /app/run-tests.sh || true
+                '''
+            }
+        }
+        
+        stage('Push to Registry') {
+            when {
+                branch 'main'
+                expression { 
+                    return currentBuild.resultIsBetterOrEqualTo('UNSTABLE') 
+                }
+            }
+            steps {
+                // Push to registry if vulnerability scan passes or is within thresholds
+                sh '''
+                    # Login to container registry and push the image
+                    # docker login -u $REGISTRY_USER -p $REGISTRY_PASS
+                    # docker tag ${FULL_IMAGE_NAME} registry.example.com/${FULL_IMAGE_NAME}
+                    # docker push registry.example.com/${FULL_IMAGE_NAME}
+                    
+                    echo "Would push image ${FULL_IMAGE_NAME} to registry"
+                '''
+            }
+        }
+    }
+    
+    post {
+        always {
+            // Clean up local image
+            sh 'docker rmi ${FULL_IMAGE_NAME} || true'
+        }
+    }
+}
